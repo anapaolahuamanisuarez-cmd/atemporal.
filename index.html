@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATEMPORAL — Matriz de Eisenhower</title>
+    <title>ATEMPORAL — Panel de Control Gamificado</title>
     <style>
         :root {
-            --bg-body: #f1f5f9;
+            --bg-body: #f8fafc;
             --bg-card: #ffffff;
             --primary: #4f46e5;
             --primary-hover: #4338ca;
@@ -24,7 +24,7 @@
             font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 30px 20px;
         }
@@ -41,154 +41,75 @@
             margin: 0 0 8px 0;
         }
 
-        .slogan {
-            color: var(--text-muted);
-            margin: 0 0 12px 0;
+        .slogan { color: var(--text-muted); margin: 0 0 12px 0; }
+
+        /* Marcador de Puntos */
+        .marcador-puntos {
+            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.25);
         }
 
-        .fecha {
-            display: inline-block;
-            background: #e0e7ff;
+        .marcador-puntos span {
+            background: white;
             color: var(--primary);
-            padding: 6px 16px;
+            padding: 2px 12px;
             border-radius: 30px;
-            font-weight: 600;
         }
 
-        /* Formulario de Nueva Tarea */
-        .form-tarea {
-            background: var(--bg-card);
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            margin-bottom: 30px;
-        }
+        .fecha { display: block; margin-top: 10px; color: var(--text-muted); font-weight: 600; }
 
-        .inputs-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .inputs-row input[type="text"] { flex: 2; min-width: 200px; }
-        .inputs-row input[type="datetime-local"] { flex: 1; min-width: 180px; }
-
-        input[type="text"], input[type="datetime-local"] {
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: #f8fafc;
-        }
-
-        .checkbox-row {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            margin-bottom: 15px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .checkbox-row label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-
-        /* Estructura de la Matriz Dinámica */
-        .matriz-container {
+        .grid-layout {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 24px;
         }
 
         @media (min-width: 768px) {
-            .matriz-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .grid-layout { grid-template-columns: repeat(2, 1fr); }
+            .full-width { grid-column: span 2; }
         }
 
-        .cuadrante {
+        .seccion {
             background: var(--bg-card);
             border-radius: var(--radius);
-            padding: 20px;
+            padding: 24px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            border-top: 5px solid var(--border);
-            min-height: 200px;
+            transition: var(--transition);
         }
 
-        /* Colores de los cuadrantes */
-        #urgente-importante { border-top-color: #ef4444; }      /* Hazlo ya */
-        #importante-no-urgente { border-top-color: #3b82f6; }   /* Planifícalo */
-        #urgente-no-importante { border-top-color: #f59e0b; }   /* Delégalo */
-        #no-urgente-no-importante { border-top-color: #10b981; }/* Elimínalo */
+        .seccion:hover { transform: translateY(-2px); }
+        h3 { color: #1e293b; margin-top: 0; margin-bottom: 15px; }
 
-        .cuadrante h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.15rem;
-            display: flex;
-            justify-content: space-between;
-            color: #1e293b;
-        }
-
-        .contador {
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        li {
-            padding: 12px;
-            background: #f8fafc;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #e2e8f0;
-            font-size: 0.95rem;
-        }
-
-        .tarea-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .tarea-fecha {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .completada {
-            background: #e2e8f0;
-            opacity: 0.5;
-        }
+        .flex-input { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        input, select { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; min-width: 120px; }
         
-        .completada .tarea-texto {
-            text-decoration: line-through;
-        }
+        button { padding: 12px 20px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+        button:hover { background-color: var(--primary-hover); }
 
-        .actions-div {
-            display: flex;
-            gap: 6px;
-        }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { padding: 12px; background: #f8fafc; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary); }
 
-        .btn-check { background-color: var(--success); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
-        .btn-delete { background-color: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+        .completada { background: #e2e8f0; opacity: 0.6; border-left-color: var(--text-muted); }
+        .completada span { text-decoration: line-through; }
+        .vencida { background: #fee2e2; border-left-color: var(--danger); }
+
+        .btn-check { background-color: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .actions-div { display: flex; gap: 6px; }
+
+        .grid-finanzas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+        .tarjeta-financiera { padding: 16px; border-radius: 10px; font-weight: 700; text-align: center; }
+        .ingresos-bg { background: #d1fae5; color: #065f46; }
+        .gastos-bg { background: #fee2e2; color: #991b1b; }
+        .balance-bg { background: #e0f2fe; color: #075985; }
     </style>
 </head>
 <body>
@@ -196,51 +117,61 @@
     <header>
         <h1>ATEMPORAL</h1>
         <p class="slogan">Organiza tus días. Construye tu futuro.</p>
-        <p class="fecha" id="fecha-actual"></p>
+        <div class="marcador-puntos">🏆 Puntos: <span id="puntos-total">0</span> | Rango: <span id="rango-jugador">Novato</span></div>
+        <span class="fecha" id="fecha-actual"></span>
     </header>
 
-    <main>
-        <!-- Formulario Inteligente -->
-        <div class="form-tarea">
-            <h3>Añadir Nueva Tarea Inteligente</h3>
-            <div class="inputs-row">
-                <input type="text" id="nueva-tarea" placeholder="¿Qué tienes que hacer?">
+    <main class="grid-layout">
+        <!-- TAREAS INTELIGENTES -->
+        <div class="seccion full-width">
+            <h3>📌 Mis Tareas e Importancia Cruzada</h3>
+            <div class="flex-input">
+                <input type="text" id="nueva-tarea" placeholder="¿Qué tienes que hacer hoy?">
                 <input type="datetime-local" id="fecha-tarea">
+                <select id="select-importante"><option value="no">No Importante</option><option value="si">⭐ Importante</option></select>
+                <select id="select-urgente"><option value="no">No Urgente</option><option value="si">⚡ Urgente</option></select>
+                <button onclick="agregarTareaWeb()">Agregar Tarea</button>
             </div>
-            <div class="checkbox-row">
-                <label><input type="checkbox" id="check-importante"> ⭐ ¿Es Importante?</label>
-                <label><input type="checkbox" id="check-urgente"> ⚡ ¿Es Urgente?</label>
-                <button onclick="agregarTareaWeb()" style="margin-left: auto;">Guardar Tarea</button>
-            </div>
+            <ul id="lista-tareas"></ul>
         </div>
 
-        <!-- Panel de Matriz de Eisenhower -->
-        <div class="matriz-container">
-            
-            <!-- Cuadrante 1 -->
-            <div class="cuadrante" id="urgente-importante">
-                <h3>🔴 Importante y Urgente <span class="contador" id="c1-count">0</span></h3>
-                <ul id="lista-c1"></ul>
+        <!-- OBJETIVOS -->
+        <div class="seccion">
+            <h3>🎯 Mis Objetivos</h3>
+            <div class="flex-input">
+                <input type="text" id="nuevo-objetivo" placeholder="Escribe un gran objetivo...">
+                <button onclick="agregarObjetivoWeb()">Agregar</button>
             </div>
+            <ul id="lista-objetivos"></ul>
+        </div>
 
-            <!-- Cuadrante 2 -->
-            <div class="cuadrante" id="importante-no-urgente">
-                <h3>🔵 Importante pero NO Urgente <span class="contador" id="c2-count">0</span></h3>
-                <ul id="lista-c2"></ul>
+        <!-- HÁBITOS -->
+        <div class="seccion">
+            <h3>⚡ Mis Hábitos</h3>
+            <div class="flex-input">
+                <input type="text" id="nuevo-habito" placeholder="Ej: Beber agua, Ejercicio...">
+                <button onclick="agregarHabitoWeb()">Crear</button>
             </div>
+            <ul id="lista-habitos"></ul>
+        </div>
 
-            <!-- Cuadrante 3 -->
-            <div class="cuadrante" id="urgente-no-importante">
-                <h3>🟡 Urgente pero NO Importante <span class="contador" id="c3-count">0</span></h3>
-                <ul id="lista-c3"></ul>
+        <!-- FINANZAS -->
+        <div class="seccion full-width">
+            <h3>💰 Mis Finanzas</h3>
+            <div class="flex-input">
+                <select id="tipo-movimiento">
+                    <option value="ingreso">Ingreso (+)</option>
+                    <option value="gasto">Gasto (-)</option>
+                </select>
+                <input type="number" id="cantidad-movimiento" placeholder="Monto S/" step="0.01">
+                <input type="text" id="desc-movimiento" placeholder="Descripción">
+                <button onclick="agregarMovimientoWeb()">Registrar</button>
             </div>
-
-            <!-- Cuadrante 4 -->
-            <div class="cuadrante" id="no-urgente-no-importante">
-                <h3>🟢 Ni Importante ni Urgente <span class="contador" id="c4-count">0</span></h3>
-                <ul id="lista-c4"></ul>
+            <div class="grid-finanzas">
+                <div class="tarjeta-financiera ingresos-bg">Ingresos<br><span id="fin-ingresos">S/ 0.00</span></div>
+                <div class="tarjeta-financiera gastos-bg">Gastos<br><span id="fin-gasto">S/ 0.00</span></div>
+                <div class="tarjeta-financiera balance-bg">Balance<br><span id="fin-balance">S/ 0.00</span></div>
             </div>
-
         </div>
     </main>
 
