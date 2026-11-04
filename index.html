@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATEMPORAL — Panel de Control</title>
+    <title>ATEMPORAL — Matriz de Eisenhower</title>
     <style>
         :root {
-            --bg-body: #f8fafc;
+            --bg-body: #f1f5f9;
             --bg-card: #ffffff;
             --primary: #4f46e5;
             --primary-hover: #4338ca;
@@ -24,14 +24,14 @@
             font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 30px 20px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         h1 {
@@ -43,7 +43,6 @@
 
         .slogan {
             color: var(--text-muted);
-            font-size: 1.1rem;
             margin: 0 0 12px 0;
         }
 
@@ -56,57 +55,92 @@
             font-weight: 600;
         }
 
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-        }
-
-        @media (min-width: 768px) {
-            .grid-layout { grid-template-columns: repeat(2, 1fr); }
-            .full-width { grid-column: span 2; }
-        }
-
-        .seccion {
+        /* Formulario de Nueva Tarea */
+        .form-tarea {
             background: var(--bg-card);
+            padding: 20px;
             border-radius: var(--radius);
-            padding: 24px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            transition: var(--transition);
+            margin-bottom: 30px;
         }
 
-        .seccion:hover {
-            transform: translateY(-2px);
-        }
-
-        .flex-input {
+        .inputs-row {
             display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
         }
 
-        input, select {
-            flex: 1;
+        .inputs-row input[type="text"] { flex: 2; min-width: 200px; }
+        .inputs-row input[type="datetime-local"] { flex: 1; min-width: 180px; }
+
+        input[type="text"], input[type="datetime-local"] {
             padding: 12px;
             border: 1px solid var(--border);
             border-radius: 8px;
             background: #f8fafc;
         }
 
-        button {
-            padding: 12px 20px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
+        .checkbox-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 15px;
             font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
+            color: var(--text-muted);
         }
 
-        button:hover {
-            background-color: var(--primary-hover);
+        .checkbox-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        /* Estructura de la Matriz Dinámica */
+        .matriz-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .matriz-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .cuadrante {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            border-top: 5px solid var(--border);
+            min-height: 200px;
+        }
+
+        /* Colores de los cuadrantes */
+        #urgente-importante { border-top-color: #ef4444; }      /* Hazlo ya */
+        #importante-no-urgente { border-top-color: #3b82f6; }   /* Planifícalo */
+        #urgente-no-importante { border-top-color: #f59e0b; }   /* Delégalo */
+        #no-urgente-no-importante { border-top-color: #10b981; }/* Elimínalo */
+
+        .cuadrante h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.15rem;
+            display: flex;
+            justify-content: space-between;
+            color: #1e293b;
+        }
+
+        .contador {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.85rem;
         }
 
         ul {
@@ -116,50 +150,45 @@
         }
 
         li {
-            padding: 14px;
+            padding: 12px;
             background: #f8fafc;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 4px solid var(--primary);
+            border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        .tarea-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tarea-fecha {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .completada {
             background: #e2e8f0;
-            opacity: 0.6;
-            border-left-color: var(--text-muted);
+            opacity: 0.5;
         }
         
-        .completada span {
+        .completada .tarea-texto {
             text-decoration: line-through;
         }
-
-        .btn-check { background-color: var(--success); }
-        .btn-delete { background-color: var(--danger); }
 
         .actions-div {
             display: flex;
             gap: 6px;
         }
 
-        .grid-finanzas {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .tarjeta-financiera {
-            padding: 16px;
-            border-radius: 10px;
-            font-weight: 700;
-            text-align: center;
-        }
-        .ingresos-bg { background: #d1fae5; color: #065f46; }
-        .gastos-bg { background: #fee2e2; color: #991b1b; }
-        .balance-bg { background: #e0f2fe; color: #075985; }
+        .btn-check { background-color: var(--success); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-delete { background-color: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -170,50 +199,48 @@
         <p class="fecha" id="fecha-actual"></p>
     </header>
 
-    <main class="grid-layout">
-        <div class="seccion">
-            <h3>📌 Mis Tareas</h3>
-            <div class="flex-input">
-                <input type="text" id="nueva-tarea" placeholder="¿Qué tienes que hacer hoy?">
-                <button onclick="agregarTareaWeb()">Agregar</button>
+    <main>
+        <!-- Formulario Inteligente -->
+        <div class="form-tarea">
+            <h3>Añadir Nueva Tarea Inteligente</h3>
+            <div class="inputs-row">
+                <input type="text" id="nueva-tarea" placeholder="¿Qué tienes que hacer?">
+                <input type="datetime-local" id="fecha-tarea">
             </div>
-            <ul id="lista-tareas"></ul>
+            <div class="checkbox-row">
+                <label><input type="checkbox" id="check-importante"> ⭐ ¿Es Importante?</label>
+                <label><input type="checkbox" id="check-urgente"> ⚡ ¿Es Urgente?</label>
+                <button onclick="agregarTareaWeb()" style="margin-left: auto;">Guardar Tarea</button>
+            </div>
         </div>
 
-        <div class="seccion">
-            <h3>🎯 Mis Objetivos</h3>
-            <div class="flex-input">
-                <input type="text" id="nuevo-objetivo" placeholder="Escribe un gran objetivo...">
-                <button onclick="agregarObjetivoWeb()">Agregar</button>
+        <!-- Panel de Matriz de Eisenhower -->
+        <div class="matriz-container">
+            
+            <!-- Cuadrante 1 -->
+            <div class="cuadrante" id="urgente-importante">
+                <h3>🔴 Importante y Urgente <span class="contador" id="c1-count">0</span></h3>
+                <ul id="lista-c1"></ul>
             </div>
-            <ul id="lista-objetivos"></ul>
-        </div>
 
-        <div class="seccion">
-            <h3>⚡ Mis Hábitos</h3>
-            <div class="flex-input">
-                <input type="text" id="nuevo-habito" placeholder="Ej: Beber agua, Ejercicio...">
-                <button onclick="agregarHabitoWeb()">Crear</button>
+            <!-- Cuadrante 2 -->
+            <div class="cuadrante" id="importante-no-urgente">
+                <h3>🔵 Importante pero NO Urgente <span class="contador" id="c2-count">0</span></h3>
+                <ul id="lista-c2"></ul>
             </div>
-            <ul id="lista-habitos"></ul>
-        </div>
 
-        <div class="seccion full-width">
-            <h3>💰 Mis Finanzas</h3>
-            <div class="flex-input">
-                <select id="tipo-movimiento">
-                    <option value="ingreso">Ingreso (+)</option>
-                    <option value="gasto">Gasto (-)</option>
-                </select>
-                <input type="number" id="cantidad-movimiento" placeholder="Monto S/" step="0.01">
-                <input type="text" id="desc-movimiento" placeholder="Descripción">
-                <button onclick="agregarMovimientoWeb()">Registrar</button>
+            <!-- Cuadrante 3 -->
+            <div class="cuadrante" id="urgente-no-importante">
+                <h3>🟡 Urgente pero NO Importante <span class="contador" id="c3-count">0</span></h3>
+                <ul id="lista-c3"></ul>
             </div>
-            <div class="grid-finanzas">
-                <div class="tarjeta-financiera ingresos-bg">Ingresos<br><span id="fin-ingresos">S/ 0.00</span></div>
-                <div class="tarjeta-financiera gastos-bg">Gastos<br><span id="fin-gasto">S/ 0.00</span></div>
-                <div class="tarjeta-financiera balance-bg">Balance<br><span id="fin-balance">S/ 0.00</span></div>
+
+            <!-- Cuadrante 4 -->
+            <div class="cuadrante" id="no-urgente-no-importante">
+                <h3>🟢 Ni Importante ni Urgente <span class="contador" id="c4-count">0</span></h3>
+                <ul id="lista-c4"></ul>
             </div>
+
         </div>
     </main>
 
