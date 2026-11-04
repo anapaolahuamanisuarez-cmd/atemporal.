@@ -3,31 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATEMPORAL - Organiza tus días</title>
+    <title>ATEMPORAL — Panel de Control</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f7f6; color: #333; max-width: 600px; margin: 40px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 5px; }
-        .slogan { text-align: center; color: #7f8c8d; font-style: italic; margin-bottom: 20px; }
-        .fecha { text-align: center; font-weight: bold; color: #16a085; }
-        .seccion { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; }
-        input[type="text"] { width: 70%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 8px 15px; background-color: #16a085; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #117a65; }
-        ul { list-style-type: none; padding: 0; }
-        li { padding: 10px; background: #f9f9f9; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .completada { text-decoration: line-through; color: #bdc3c7; }
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            color: var(--primary);
+            margin: 0 0 8px 0;
+        }
+
+        .slogan {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+        }
+
+        .fecha {
+            display: inline-block;
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-layout { grid-template-columns: repeat(2, 1fr); }
+            .full-width { grid-column: span 2; }
+        }
+
+        .seccion {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            animation: fadeInUp 0.5s ease-out both;
+        }
+
+        .seccion:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flex-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        input, select {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #f8fafc;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding: 14px 16px;
+            background: #f8fafc;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+            animation: scaleIn 0.3s ease;
+        }
+
+        li:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .completada {
+            background: #f1f5f9;
+            border-left-color: var(--text-muted);
+            opacity: 0.6;
+        }
+        
+        .completada span {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .btn-check {
+            background-color: var(--success);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        .btn-check:hover { background-color: #059669; }
+
+        .btn-delete {
+            background-color: transparent;
+            color: var(--text-muted);
+            padding: 6px;
+            font-size: 1rem;
+        }
+        .btn-delete:hover {
+            color: var(--danger);
+            background: #fee2e2;
+        }
+
+        .actions-div {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .grid-finanzas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .tarjeta-financiera {
+            padding: 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
+        }
+        .ingresos-bg { background: #d1fae5; color: #065f46; }
+        .gastos-bg { background: #fee2e2; color: #991b1b; }
+        .balance-bg { background: #e0f2fe; color: #075985; }
+
+        /* ANIMACIONES */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
-    <h1>ATEMPORAL</h1>
-    <p class="slogan">Organiza tus días. Construye tu futuro.</p>
-    <p class="fecha" id="fecha-actual"></p>
-    <div class="seccion">
-        <h3>Mis Tareas</h3>
-        <input type="text" id="nueva-tarea" placeholder="Escribe una nueva tarea...">
-        <button onclick="agregarTareaWeb()">Agregar</button>
-        <ul id="lista-tareas"></ul>
-    </div>
+
+    <header>
+        <h1>ATEMPORAL</h1>
+        <p class="slogan">Organiza tus días. Construye tu futuro.</p>
+        <p class="fecha" id="fecha-actual"></p>
+    </header>
+
+    <main class="grid-layout">
+        <!-- TAREAS -->
+        <div class="seccion" style="animation-delay: 0.1s;">
+            <h3>📌 Mis Tareas</h3>
+            <div class="flex-input">
+                <input type="text" id="nueva-tarea" placeholder="¿Qué tienes que hacer hoy?">
+                <button onclick="agregarTareaWeb()">Agregar</button>
+            </div>
+            <ul id="lista-tareas"></ul>
+        </div>
+
+        <!-- OBJETIVOS -->
+        <div class="seccion" style="animation-delay: 0.2s;">
+            <h3>🎯 Mis Objetivos</h3>
+            <div class="flex-input">
+                <input type="text" id="nuevo-objetivo" placeholder="Escribe un gran objetivo...">
+                <button onclick="agregarObjetivoWeb()">Agregar</button>
+            </div>
+            <ul id="lista-objetivos"></ul>
+        </div>
+
+        <!-- HÁBITOS -->
+        <div class="seccion" style="animation-delay: 0.3s;">
+            <h3>⚡ Mis Hábitos</h3>
+            <div class="flex-input">
+                <input type="text" id="nuevo-habito" placeholder="Ej: Beber agua, Ejercicio...">
+                <button onclick="agregarHabitoWeb()">Crear</button>
+            </div>
+            <ul id="lista-habitos"></ul>
+        </div>
+
+        <!-- FINANZAS -->
+        <div class="seccion full-width" style="animation-delay: 0.4s;">
+            <h3>💰 Mis Finanzas</h3>
+            <div class="flex-input">
+                <select id="tipo-movimiento" style="flex: 0.5;">
+                    <option value="ingreso">Ingreso (+)</option>
+                    <option value="gasto">Gasto (-)</option>
+                </select>
+                <input type="number" id="cantidad-movimiento" placeholder="Monto S/" step="0.01">
+                <input type="text" id="desc-movimiento" placeholder="Descripción (ej: Sueldo, Almuerzo)">
+                <button onclick="agregarMovimientoWeb()">Registrar</button>
+            </div>
+            <div class="grid-finanzas">
+                <div class="tarjeta-financiera ingresos-bg">Ingresos<br><span id="fin-ingresos" style="font-size: 1.25rem;">S/ 0.00</span></div>
+                <div class="tarjeta-financiera gastos-bg">Gastos<br><span id="fin-gasto" style="font-size: 1.25rem;">S/ 0.00</span></div>
+                <div class="tarjeta-financiera balance-bg">Balance<br><span id="fin-balance" style="font-size: 1.25rem;">S/ 0.00</span></div>
+            </div>
+        </div>
+    </main>
+
     <script src="index.js"></script>
 </body>
 </html>
