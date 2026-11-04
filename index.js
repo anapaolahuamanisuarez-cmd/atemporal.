@@ -1,299 +1,219 @@
 "use strict";
 
-// ============================================
-//                 ATEMPORAL
-//       Organiza tus días. Construye tu futuro.
-// ============================================
-
 const ATEMPORAL = {
-    nombre: "ATEMPORAL",
+    tareas: JSON.parse(localStorage.getItem("at_tareas")) || [],
+    objetivos: JSON.parse(localStorage.getItem("at_objetivos")) || [],
+    habitos: JSON.parse(localStorage.getItem("at_habitos")) || [],
+    movimientos: JSON.parse(localStorage.getItem("at_movimientos")) || [],
 
-    tareas: [],
-    objetivos: [],
-    habitos: [],
-    eventos: [],
-    notas: [],
-    movimientos: [],
+    guardar() {
+        localStorage.setItem("at_tareas", JSON.stringify(this.tareas));
+        localStorage.setItem("at_objetivos", JSON.stringify(this.objetivos));
+        localStorage.setItem("at_habitos", JSON.stringify(this.habitos));
+        localStorage.setItem("at_movimientos", JSON.stringify(this.movimientos));
+    },
 
     fechaActual() {
         return new Date().toLocaleDateString("es-PE", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric"
+            weekday: "long", day: "numeric", month: "long", year: "numeric"
         });
-    },
-
-    encabezado() {
-        console.log("\n");
-        console.log("==========================================");
-        console.log("              ATEMPORAL");
-        console.log("   Organiza tus días. Construye tu futuro.");
-        console.log("==========================================");
-        console.log("Fecha:", this.fechaActual());
-        console.log("------------------------------------------");
     },
 
     agregarTarea(nombre, fecha = "Sin fecha") {
         if (!nombre || !nombre.trim()) return;
-
-        this.tareas.push({
-            nombre: nombre.trim(),
-            fecha,
-            completada: false
-        });
-
-        console.log("Tarea agregada:", nombre);
+        this.tareas.push({ nombre: nombre.trim(), fecha, completada: false });
+        this.guardar();
     },
 
-    completarTarea(numero) {
-        const tarea = this.tareas[numero - 1];
-
-        if (!tarea) {
-            console.log("No se encontró esa tarea.");
-            return;
+    completarTarea(indice) {
+        if (this.tareas[indice]) {
+            this.tareas[indice].completada = true;
+            this.guardar();
         }
-
-        tarea.completada = true;
-        console.log("Tarea completada:", tarea.nombre);
     },
 
-    mostrarTareas() {
-        console.log("\n--- MIS TAREAS ---");
-
-        if (this.tareas.length === 0) {
-            console.log("No tienes tareas registradas.");
-            return;
-        }
-
-        this.tareas.forEach((tarea, indice) => {
-            const estado = tarea.completada ? "Hecha" : "Pendiente";
-
-            console.log(
-                `${indice + 1}. ${tarea.nombre} | ${tarea.fecha} | ${estado}`
-            );
-        });
+    eliminarTarea(indice) {
+        this.tareas.splice(indice, 1);
+        this.guardar();
     },
 
     agregarObjetivo(nombre) {
         if (!nombre || !nombre.trim()) return;
-
-        this.objetivos.push({
-            nombre: nombre.trim(),
-            completado: false
-        });
-
-        console.log("Objetivo agregado:", nombre);
+        this.objetivos.push({ nombre: nombre.trim(), completado: false });
+        this.guardar();
     },
 
-    completarObjetivo(numero) {
-        const objetivo = this.objetivos[numero - 1];
-
-        if (!objetivo) {
-            console.log("Objetivo no encontrado.");
-            return;
+    completarObjetivo(indice) {
+        if (this.objetivos[indice]) {
+            this.objetivos[indice].completado = true;
+            this.guardar();
         }
-
-        objetivo.completado = true;
-        console.log("Objetivo completado:", objetivo.nombre);
     },
 
-    mostrarObjetivos() {
-        console.log("\n--- MIS OBJETIVOS ---");
-
-        if (this.objetivos.length === 0) {
-            console.log("No tienes objetivos registrados.");
-            return;
-        }
-
-        this.objetivos.forEach((objetivo, indice) => {
-            console.log(
-                `${indice + 1}. ${objetivo.nombre} | ${
-                    objetivo.completado ? "Completado" : "En progreso"
-                }`
-            );
-        });
+    eliminarObjetivo(indice) {
+        this.objetivos.splice(indice, 1);
+        this.guardar();
     },
 
     agregarHabito(nombre) {
         if (!nombre || !nombre.trim()) return;
-
-        this.habitos.push({
-            nombre: nombre.trim(),
-            registros: []
-        });
-
-        console.log("Hábito agregado:", nombre);
+        this.habitos.push({ nombre: nombre.trim(), registros: [] });
+        this.guardar();
     },
 
-    registrarHabito(numero) {
-        const habito = this.habitos[numero - 1];
-
-        if (!habito) {
-            console.log("Hábito no encontrado.");
-            return;
-        }
-
+    registrarHabito(indice) {
+        const habito = this.habitos[indice];
+        if (!habito) return;
         const hoy = new Date().toLocaleDateString("en-CA");
-
-        if (habito.registros.includes(hoy)) {
-            console.log("Este hábito ya fue registrado hoy.");
-            return;
+        if (!habito.registros.includes(hoy)) {
+            habito.registros.push(hoy);
+            this.guardar();
+        } else {
+            alert("¡Ya registraste este hábito hoy!");
         }
-
-        habito.registros.push(hoy);
-        console.log("Hábito registrado:", habito.nombre);
     },
 
-    mostrarHabitos() {
-        console.log("\n--- MIS HÁBITOS ---");
-
-        if (this.habitos.length === 0) {
-            console.log("No tienes hábitos registrados.");
-            return;
-        }
-
-        this.habitos.forEach((habito, indice) => {
-            console.log(
-                `${indice + 1}. ${habito.nombre} | ${habito.registros.length} días`
-            );
-        });
-    },
-
-    agregarEvento(nombre, fecha) {
-        if (!nombre || !nombre.trim() || !fecha) {
-            console.log("Completa el nombre y la fecha.");
-            return;
-        }
-
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
-            console.log("Usa el formato AAAA-MM-DD.");
-            return;
-        }
-
-        const [anio, mes, dia] = fecha.split("-").map(Number);
-        const comprobacion = new Date(anio, mes - 1, dia);
-
-        if (
-            comprobacion.getFullYear() !== anio ||
-            comprobacion.getMonth() !== mes - 1 ||
-            comprobacion.getDate() !== dia
-        ) {
-            console.log("La fecha no es válida.");
-            return;
-        }
-
-        this.eventos.push({
-            nombre: nombre.trim(),
-            fecha
-        });
-
-        console.log("Evento agregado:", nombre);
-    },
-
-    mostrarCalendario() {
-        console.log("\n--- MI CALENDARIO ---");
-
-        if (this.eventos.length === 0) {
-            console.log("No tienes eventos registrados.");
-            return;
-        }
-
-        const ordenados = [...this.eventos].sort(
-            (a, b) => a.fecha.localeCompare(b.fecha)
-        );
-
-        ordenados.forEach(evento => {
-            console.log(`${evento.fecha} | ${evento.nombre}`);
-        });
-    },
-
-    agregarNota(titulo, contenido) {
-        if (!titulo || !titulo.trim() || !contenido || !contenido.trim()) {
-            console.log("Completa el título y el contenido.");
-            return;
-        }
-
-        this.notas.push({
-            titulo: titulo.trim(),
-            contenido: contenido.trim(),
-            fecha: this.fechaActual()
-        });
-
-        console.log("Nota guardada:", titulo);
-    },
-
-    mostrarNotas() {
-        console.log("\n--- MIS NOTAS ---");
-
-        if (this.notas.length === 0) {
-            console.log("No tienes notas guardadas.");
-            return;
-        }
-
-        this.notas.forEach((nota, indice) => {
-            console.log(`${indice + 1}. ${nota.titulo}`);
-            console.log(nota.contenido);
-            console.log("Fecha:", nota.fecha);
-        });
+    eliminarHabito(indice) {
+        this.habitos.splice(indice, 1);
+        this.guardar();
     },
 
     agregarMovimiento(tipo, cantidad, descripcion) {
-        if (
-            !["ingreso", "gasto"].includes(tipo) ||
-            !Number.isFinite(cantidad) ||
-            cantidad <= 0
-        ) {
-            console.log("Movimiento no válido.");
-            return;
-        }
-
-        this.movimientos.push({
-            tipo,
-            cantidad,
-            descripcion: descripcion || "Sin descripción"
-        });
-
-        console.log("Movimiento registrado.");
+        if (!["ingreso", "gasto"].includes(tipo) || isNaN(cantidad) || cantidad <= 0) return;
+        this.movimientos.push({ tipo, cantidad, descripcion: descripcion || "Sin descripción" });
+        this.guardar();
     },
 
-    mostrarFinanzas() {
-        const ingresos = this.movimientos
-            .filter(m => m.tipo === "ingreso")
-            .reduce((total, m) => total + m.cantidad, 0);
-
-        const gastos = this.movimientos
-            .filter(m => m.tipo === "gasto")
-            .reduce((total, m) => total + m.cantidad, 0);
-
-        console.log("\n--- MIS FINANZAS ---");
-        console.log("Ingresos: S/ " + ingresos.toFixed(2));
-        console.log("Gastos: S/ " + gastos.toFixed(2));
-        console.log("Balance: S/ " + (ingresos - gastos).toFixed(2));
-    },
-
-    mostrarResumen() {
-        this.encabezado();
-
-        console.log("RESUMEN GENERAL");
-        console.log("------------------------------------------");
-        console.log("Tareas pendientes:",
-            this.tareas.filter(t => !t.completada).length);
-        console.log("Objetivos:", this.objetivos.length);
-        console.log("Hábitos:", this.habitos.length);
-        console.log("Eventos:", this.eventos.length);
-        console.log("Notas:", this.notas.length);
-        console.log("------------------------------------------");
-        console.log("Tu progreso comienza con pequeños pasos.");
+    eliminarMovimiento(indice) {
+        this.movimientos.splice(indice, 1);
+        this.guardar();
     }
 };
 
 // ============================================
-//          INICIO DE ATEMPORAL
+//          CONTROLADORES DE LA INTERFAZ WEB
 // ============================================
 
-ATEMPORAL.encabezado();
-ATEMPORAL.mostrarResumen();
+document.getElementById("fecha-actual").innerText = ATEMPORAL.fechaActual();
 
-console.log("\nATEMPORAL se ha iniciado correctamente.");
-console.log("El sistema está preparado para registrar tus actividades.");
+function agregarTareaWeb() {
+    const input = document.getElementById("nueva-tarea");
+    if (input.value.trim() !== "") {
+        ATEMPORAL.agregarTarea(input.value);
+        input.value = "";
+        renderizarTodo();
+    }
+}
+function completarTareaWeb(indice) {
+    ATEMPORAL.completarTarea(indice);
+    renderizarTodo();
+}
+function eliminarTareaWeb(indice) {
+    ATEMPORAL.eliminarTarea(indice);
+    renderizarTodo();
+}
+
+function agregarObjetivoWeb() {
+    const input = document.getElementById("nuevo-objetivo");
+    if (input.value.trim() !== "") {
+        ATEMPORAL.agregarObjetivo(input.value);
+        input.value = "";
+        renderizarTodo();
+    }
+}
+function completarObjetivoWeb(indice) {
+    ATEMPORAL.completarObjetivo(indice);
+    renderizarTodo();
+}
+function eliminarObjetivoWeb(indice) {
+    ATEMPORAL.eliminarObjetivo(indice);
+    renderizarTodo();
+}
+
+function agregarHabitoWeb() {
+    const input = document.getElementById("nuevo-habito");
+    if (input.value.trim() !== "") {
+        ATEMPORAL.agregarHabito(input.value);
+        input.value = "";
+        renderizarTodo();
+    }
+}
+function registrarHabitoWeb(indice) {
+    ATEMPORAL.registrarHabito(indice);
+    renderizarTodo();
+}
+function eliminarHabitoWeb(indice) {
+    ATEMPORAL.eliminarHabito(indice);
+    renderizarTodo();
+}
+
+function agregarMovimientoWeb() {
+    const tipo = document.getElementById("tipo-movimiento").value;
+    const cantidad = parseFloat(document.getElementById("cantidad-movimiento").value);
+    const desc = document.getElementById("desc-movimiento").value;
+
+    if (!isNaN(cantidad) && cantidad > 0) {
+        ATEMPORAL.agregarMovimiento(tipo, cantidad, desc);
+        document.getElementById("cantidad-movimiento").value = "";
+        document.getElementById("desc-movimiento").value = "";
+        renderizarTodo();
+    }
+}
+
+function renderizarTodo() {
+    // Tareas
+    const listaT = document.getElementById("lista-tareas");
+    listaT.innerHTML = "";
+    ATEMPORAL.tareas.forEach((t, i) => {
+        const li = document.createElement("li");
+        if (t.completada) li.className = "completada";
+        li.innerHTML = `
+            <span>${t.nombre}</span>
+            <div class="actions-div">
+                ${!t.completada ? `<button class="btn-check" onclick="completarTareaWeb(${i})">✓</button>` : '🎉'}
+                <button class="btn-delete" onclick="eliminarTareaWeb(${i})">🗑️</button>
+            </div>`;
+        listaT.appendChild(li);
+    });
+
+    // Objetivos
+    const listaO = document.getElementById("lista-objetivos");
+    listaO.innerHTML = "";
+    ATEMPORAL.objetivos.forEach((o, i) => {
+        const li = document.createElement("li");
+        if (o.completado) li.className = "completada";
+        li.innerHTML = `
+            <span>${o.nombre}</span>
+            <div class="actions-div">
+                ${!o.completado ? `<button class="btn-check" onclick="completarObjetivoWeb(${i})">✓</button>` : '🏆'}
+                <button class="btn-delete" onclick="eliminarObjetivoWeb(${i})">🗑️</button>
+            </div>`;
+        listaO.appendChild(li);
+    });
+
+    // Hábitos
+    const listaH = document.getElementById("lista-habitos");
+    listaH.innerHTML = "";
+    ATEMPORAL.habitos.forEach((h, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <span>${h.nombre} <b>(${h.registros.length} d)</b></span>
+            <div class="actions-div">
+                <button class="btn-check" onclick="registrarHabitoWeb(${i})">+1 Día</button>
+                <button class="btn-delete" onclick="eliminarHabitoWeb(${i})">🗑️</button>
+            </div>`;
+        listaH.appendChild(li);
+    });
+
+    // Finanzas recalculadas
+    const ingresos = ATEMPORAL.movimientos.filter(m => m.tipo === "ingreso").reduce((sum, m) => sum + m.cantidad, 0);
+    const gastos = ATEMPORAL.movimientos.filter(m => m.tipo === "gasto").reduce((sum, m) => sum + m.cantidad, 0);
+    const balance = ingresos - gastos;
+
+    document.getElementById("fin-ingresos").innerText = "S/ " + ingresos.toFixed(2);
+    document.getElementById("fin-gasto").innerText = "S/ " + gastos.toFixed(2);
+    document.getElementById("fin-balance").innerText = "S/ " + balance.toFixed(2);
+}
+
+// Carga inicial
+renderizarTodo();
