@@ -30,7 +30,8 @@ const ATEMPORAL = {
             importante: esImportante,
             urgente: esUrgente,
             completada: false,
-            penalizada: false
+            penalizada: false,
+            notificada: false
         });
         this.guardar();
     },
@@ -89,21 +90,49 @@ const ATEMPORAL = {
     verificarVencimientos() {
         let huboCambios = false;
         const ahora = new Date();
+
         this.tareas.forEach(t => {
-            if (!t.completada && !t.penalizada && t.fechaLimite) {
-                if (ahora > new Date(t.fechaLimite)) {
+            if (!t.completada && t.fechaLimite) {
+                const limite = new Date(t.fechaLimite);
+                const diferenciaHoras = (limite - ahora) / (1000 * 60 * 60);
+
+                // Configurado a 20 horas de anticipación
+                if (diferenciaHoras > 0 && diferenciaHoras <= 20 && !t.notificada) {
+                    t.notificada = true;
+                    huboCambios = true;
+                    crearAlertaVisual(`⏳ ¡Quedan menos de 20 horas para entregar: "${t.nombre}"!`);
+                }
+
+                if (ahora > limite && !t.penalizada) {
                     t.penalizada = true;
                     this.puntos -= 2; 
                     huboCambios = true;
+                    crearAlertaVisual(`🚨 Tiempo agotado para "${t.nombre}". Perdiste 2 puntos.`);
                 }
             }
         });
+
         if (huboCambios) {
             this.guardar();
             renderizarTodo();
         }
     }
 };
+
+function crearAlertaVisual(mensaje) {
+    const contenedor = document.getElementById("contenedor-notificaciones");
+    if (!contenedor) return;
+
+    const div = document.createElement("div");
+    div.className = "notificacion-alerta";
+    div.innerHTML = `
+        <span>${mensaje}</span>
+        <button class="btn-cerrar-notif" onclick="this.parentElement.remove()">✕</button>
+    `;
+
+    contenedor.appendChild(div);
+    setTimeout(() => { div.remove(); }, 8000);
+}
 
 // ============================================
 //          CONTROLADORES DE INTERFAZ
@@ -133,7 +162,6 @@ function agregarTareaWeb() {
 
 function completarTareaWeb(i) { ATEMPORAL.completarTarea(i); renderizarTodo(); }
 
-// Corregido de forma redundante
 function agregarObjetivoWeb() {
     const input = document.getElementById("nuevo-objetivo");
     if (input && input.value.trim() !== "") { 
@@ -142,7 +170,7 @@ function agregarObjetivoWeb() {
         renderizarTodo(); 
     }
 }
-function completarObjetivoWeb(i) { ATEMPORAL.completarObjetivo(i); renderizarTodo(); }
+function completarObjectiveWeb(i) { ATEMPORAL.completarObjetivo(i); renderizarTodo(); }
 
 function agregarHabitoWeb() {
     const input = document.getElementById("nuevo-habito");
@@ -171,13 +199,16 @@ function renderizarTodo() {
         document.getElementById("puntos-total").innerText = ATEMPORAL.puntos;
     }
     
-    if(document.getElementById("rango-jugador")) {
-        let rango = "Novato 🛡️";
-        if (ATEMPORAL.puntos >= 30) rango = "Productivo Leyenda 🏆";
-        else if (ATEMPORAL.puntos >= 15) rango = "Enfoque Avanzado ⭐";
-        else if (ATEMPORAL.puntos >= 5) rango = "Iniciado Activo ⚡";
-        document.getElementById("rango-jugador").innerText = rango;
-    }
+    let rango = "Novato 🛡️";
+    let porcentaje = 0;
+    
+    if (ATEMPORAL.puntos >= 30) { rango = "Productivo Leyenda 🏆"; porcentaje = 100; }
+    else if (ATEMPORAL.puntos >= 15) { rango = "Enfoque Avanzado ⭐"; porcentaje = ((ATEMPORAL.puntos - 15) / 15) * 100; }
+    else if (ATEMPORAL.puntos >= 5) { rango = "Iniciado Activo ⚡"; porcentaje = ((ATEMPORAL.puntos - 5) / 10) * 100; }
+    else { porcentaje = (Math.max(0, ATEMPORAL.puntos) / 5) * 100; }
+
+    if(document.getElementById("rango-jugador")) document.getElementById("rango-jugador").innerText = rango;
+    if(document.getElementById("barra-progreso")) document.getElementById("barra-progreso").style.width = porcentaje + "%";
 
     const listaT = document.getElementById("lista-tareas");
     if (listaT) {
@@ -185,8 +216,15 @@ function renderizarTodo() {
         const ahora = new Date();
         ATEMPORAL.tareas.forEach((t, i) => {
             const li = document.createElement("li");
-            if (t.completada) li.className = "completada";
-            else if (t.fechaLimite && ahora > new Date(t.fechaLimite)) li.className = "vencida";
+            
+            if (t.completada) {
+                li.className = "completada";
+            } else if (t.fechaLimite) {
+                const limite = new Date(t.fechaLimite);
+                const difHoras = (limite - ahora) / (1000 * 60 * 60);
+                if (difHoras <= 0) li.className = "vencida";
+                else if (difHoras <= 20) li.className = "proxima-vencer"; 
+            }
 
             let tag = `[${t.importante ? 'Importante' : 'No Importante'} | ${t.urgente ? 'Urgente' : 'No Urgente'}]`;
 
@@ -207,7 +245,7 @@ function renderizarTodo() {
         ATEMPORAL.objetivos.forEach((o, i) => {
             const li = document.createElement("li");
             if (o.completado) li.className = "completada";
-            li.innerHTML = `<span>${o.nombre}</span> <div>${!o.completado ? `<button class="btn-check" onclick="completarObjetivoWeb(${i})">✓</button>` : '🏆'}</div>`;
+            li.innerHTML = `<span>${o.nombre}</span> <div>${!o.completado ? `<button class="btn-check" onclick="ATEMPORAL.completarObjetivo(${i}); renderizarTodo();">✓</button>` : '🏆'}</div>`;
             listaO.appendChild(li);
         });
     }
@@ -223,14 +261,3 @@ function renderizarTodo() {
     }
 
     const finIngresos = document.getElementById("fin-ingresos");
-    const finGasto = document.getElementById("fin-gasto");
-    const finBalance = document.getElementById("fin-balance");
-
-    if (finIngresos && finGasto && finBalance) {
-        const ingresos = ATEMPORAL.movimientos.filter(m => m.tipo === "ingreso").reduce((sum, m) => sum + m.cantidad, 0);
-        const gastos = ATEMPORAL.movimientos.filter(m => m.tipo === "gasto").reduce((sum, m) => sum + m.cantidad, 0);
-        finIngresos.innerText = "S/ " + ingresos.toFixed(2);
-        finGasto.innerText = "S/ " + gastos.toFixed(2);
-        finBalance.innerText = "S/ " + (ingresos - gastos).toFixed(2);
-    }
-}
