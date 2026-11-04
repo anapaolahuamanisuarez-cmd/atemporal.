@@ -16,12 +16,12 @@
             --text-muted: #64748b;
             --border: #e2e8f0;
             --radius: 12px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            --transition: all 0.25s ease;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             max-width: 800px;
@@ -32,13 +32,11 @@
         header {
             text-align: center;
             margin-bottom: 40px;
-            animation: fadeInDown 0.6s ease;
         }
 
         h1 {
             font-size: 2.5rem;
             font-weight: 800;
-            letter-spacing: -0.05em;
             color: var(--primary);
             margin: 0 0 8px 0;
         }
@@ -56,7 +54,6 @@
             padding: 6px 16px;
             border-radius: 30px;
             font-weight: 600;
-            font-size: 0.9rem;
         }
 
         .grid-layout {
@@ -77,21 +74,10 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             transition: var(--transition);
-            animation: fadeInUp 0.5s ease-out both;
         }
 
         .seccion:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
-        }
-
-        h3 {
-            font-size: 1.25rem;
-            margin-top: 0;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            transform: translateY(-2px);
         }
 
         .flex-input {
@@ -102,19 +88,10 @@
 
         input, select {
             flex: 1;
-            padding: 12px 16px;
+            padding: 12px;
             border: 1px solid var(--border);
             border-radius: 8px;
-            font-size: 0.95rem;
             background: #f8fafc;
-            transition: var(--transition);
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         }
 
         button {
@@ -139,7 +116,7 @@
         }
 
         li {
-            padding: 14px 16px;
+            padding: 14px;
             background: #f8fafc;
             margin-bottom: 10px;
             border-radius: 8px;
@@ -147,48 +124,24 @@
             justify-content: space-between;
             align-items: center;
             border-left: 4px solid var(--primary);
-            transition: var(--transition);
-            animation: scaleIn 0.3s ease;
-        }
-
-        li:hover {
-            background: #f1f5f9;
-            transform: translateX(4px);
         }
 
         .completada {
-            background: #f1f5f9;
-            border-left-color: var(--text-muted);
+            background: #e2e8f0;
             opacity: 0.6;
+            border-left-color: var(--text-muted);
         }
         
         .completada span {
             text-decoration: line-through;
-            color: var(--text-muted);
         }
 
-        .btn-check {
-            background-color: var(--success);
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-        .btn-check:hover { background-color: #059669; }
-
-        .btn-delete {
-            background-color: transparent;
-            color: var(--text-muted);
-            padding: 6px;
-            font-size: 1rem;
-        }
-        .btn-delete:hover {
-            color: var(--danger);
-            background: #fee2e2;
-        }
+        .btn-check { background-color: var(--success); }
+        .btn-delete { background-color: var(--danger); }
 
         .actions-div {
             display: flex;
             gap: 6px;
-            align-items: center;
         }
 
         .grid-finanzas {
@@ -203,25 +156,10 @@
             border-radius: 10px;
             font-weight: 700;
             text-align: center;
-            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
         }
         .ingresos-bg { background: #d1fae5; color: #065f46; }
         .gastos-bg { background: #fee2e2; color: #991b1b; }
         .balance-bg { background: #e0f2fe; color: #075985; }
-
-        /* ANIMACIONES */
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
     </style>
 </head>
 <body>
@@ -233,8 +171,7 @@
     </header>
 
     <main class="grid-layout">
-        <!-- TAREAS -->
-        <div class="seccion" style="animation-delay: 0.1s;">
+        <div class="seccion">
             <h3>📌 Mis Tareas</h3>
             <div class="flex-input">
                 <input type="text" id="nueva-tarea" placeholder="¿Qué tienes que hacer hoy?">
@@ -243,8 +180,7 @@
             <ul id="lista-tareas"></ul>
         </div>
 
-        <!-- OBJETIVOS -->
-        <div class="seccion" style="animation-delay: 0.2s;">
+        <div class="seccion">
             <h3>🎯 Mis Objetivos</h3>
             <div class="flex-input">
                 <input type="text" id="nuevo-objetivo" placeholder="Escribe un gran objetivo...">
@@ -253,8 +189,7 @@
             <ul id="lista-objetivos"></ul>
         </div>
 
-        <!-- HÁBITOS -->
-        <div class="seccion" style="animation-delay: 0.3s;">
+        <div class="seccion">
             <h3>⚡ Mis Hábitos</h3>
             <div class="flex-input">
                 <input type="text" id="nuevo-habito" placeholder="Ej: Beber agua, Ejercicio...">
@@ -263,22 +198,21 @@
             <ul id="lista-habitos"></ul>
         </div>
 
-        <!-- FINANZAS -->
-        <div class="seccion full-width" style="animation-delay: 0.4s;">
+        <div class="seccion full-width">
             <h3>💰 Mis Finanzas</h3>
             <div class="flex-input">
-                <select id="tipo-movimiento" style="flex: 0.5;">
+                <select id="tipo-movimiento">
                     <option value="ingreso">Ingreso (+)</option>
                     <option value="gasto">Gasto (-)</option>
                 </select>
                 <input type="number" id="cantidad-movimiento" placeholder="Monto S/" step="0.01">
-                <input type="text" id="desc-movimiento" placeholder="Descripción (ej: Sueldo, Almuerzo)">
+                <input type="text" id="desc-movimiento" placeholder="Descripción">
                 <button onclick="agregarMovimientoWeb()">Registrar</button>
             </div>
             <div class="grid-finanzas">
-                <div class="tarjeta-financiera ingresos-bg">Ingresos<br><span id="fin-ingresos" style="font-size: 1.25rem;">S/ 0.00</span></div>
-                <div class="tarjeta-financiera gastos-bg">Gastos<br><span id="fin-gasto" style="font-size: 1.25rem;">S/ 0.00</span></div>
-                <div class="tarjeta-financiera balance-bg">Balance<br><span id="fin-balance" style="font-size: 1.25rem;">S/ 0.00</span></div>
+                <div class="tarjeta-financiera ingresos-bg">Ingresos<br><span id="fin-ingresos">S/ 0.00</span></div>
+                <div class="tarjeta-financiera gastos-bg">Gastos<br><span id="fin-gasto">S/ 0.00</span></div>
+                <div class="tarjeta-financiera balance-bg">Balance<br><span id="fin-balance">S/ 0.00</span></div>
             </div>
         </div>
     </main>
