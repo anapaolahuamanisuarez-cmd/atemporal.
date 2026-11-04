@@ -1,17 +1,11 @@
 "use strict";
 
 const ATEMPORAL = {
-    // Corregido: Ahora se inicializan correctamente los arreglos vacíos si no hay datos previos
-    tareas: JSON.parse(localStorage.getItem("at_tareas")) || [],
-    objetivos: JSON.parse(localStorage.getItem("at_objetivos")) || [],
-    habitos: JSON.parse(localStorage.getItem("at_habitos")) || [],
-    movimientos: JSON.parse(localStorage.getItem("at_movimientos")) || [],
+    // Lee las tareas guardadas del almacenamiento del navegador
+    tareas: JSON.parse(localStorage.getItem("at_tareas_matriz")) || [],
 
     guardar() {
-        localStorage.setItem("at_tareas", JSON.stringify(this.tareas));
-        localStorage.setItem("at_objetivos", JSON.stringify(this.objetivos));
-        localStorage.setItem("at_habitos", JSON.stringify(this.habitos));
-        localStorage.setItem("at_movimientos", JSON.stringify(this.movimientos));
+        localStorage.setItem("at_tareas_matriz", JSON.stringify(this.tareas));
     },
 
     fechaActual() {
@@ -20,9 +14,18 @@ const ATEMPORAL = {
         });
     },
 
-    agregarTarea(nombre) {
+    // Agrega la tarea guardando si es importante, urgente y su fecha límite
+    agregarTarea(nombre, fechaEntrega, esImportante, esUrgente) {
         if (!nombre || !nombre.trim()) return;
-        this.tareas.push({ nombre: nombre.trim(), completada: false });
+        
+        this.tareas.push({
+            nombre: nombre.trim(),
+            fecha: fechaEntrega ? new Date(fechaEntrega).toLocaleString("es-PE") : "Sin fecha",
+            importante: esImportante,
+            urgente: esUrgente,
+            completada: false
+        });
+        
         this.guardar();
     },
 
@@ -35,53 +38,6 @@ const ATEMPORAL = {
 
     eliminarTarea(indice) {
         this.tareas.splice(indice, 1);
-        this.guardar();
-    },
-
-    agregarObjetivo(nombre) {
-        if (!nombre || !nombre.trim()) return;
-        this.objetivos.push({ nombre: nombre.trim(), completado: false });
-        this.guardar();
-    },
-
-    completarObjetivo(indice) {
-        if (this.objetivos[indice]) {
-            this.objetivos[indice].completado = true;
-            this.guardar();
-        }
-    },
-
-    eliminarObjetivo(indice) {
-        this.objetivos.splice(indice, 1);
-        this.guardar();
-    },
-
-    agregarHabito(nombre) {
-        if (!nombre || !nombre.trim()) return;
-        this.habitos.push({ nombre: nombre.trim(), registros: [] });
-        this.guardar();
-    },
-
-    registrarHabito(indice) {
-        const habito = this.habitos[indice];
-        if (!habito) return;
-        const hoy = new Date().toLocaleDateString("en-CA");
-        if (!habito.registros.includes(hoy)) {
-            habito.registros.push(hoy);
-            this.guardar();
-        } else {
-            alert("¡Ya registraste este hábito hoy!");
-        }
-    },
-
-    eliminarHabito(indice) {
-        this.habitos.splice(indice, 1);
-        this.guardar();
-    },
-
-    agregarMovimiento(tipo, cantidad, descripcion) {
-        if (!["ingreso", "gasto"].includes(tipo) || isNaN(cantidad) || cantidad <= 0) return;
-        this.movimientos.push({ tipo, cantidad, descripcion: descripcion || "Sin descripción" });
         this.guardar();
     }
 };
@@ -96,128 +52,88 @@ window.onload = function() {
 };
 
 function agregarTareaWeb() {
-    const input = document.getElementById("nueva-tarea");
-    if (input && input.value.trim() !== "") {
-        ATEMPORAL.agregarTarea(input.value);
-        input.value = "";
+    const inputNombre = document.getElementById("nueva-tarea");
+    const inputFecha = document.getElementById("fecha-tarea");
+    const checkImportante = document.getElementById("check-importante").checked;
+    const checkUrgente = document.getElementById("check-urgente").checked;
+
+    if (inputNombre && inputNombre.value.trim() !== "") {
+        ATEMPORAL.agregarTarea(
+            inputNombre.value,
+            inputFecha.value,
+            checkImportante,
+            checkUrgente
+        );
+
+        // Resetear campos del formulario
+        inputNombre.value = "";
+        inputFecha.value = "";
+        document.getElementById("check-importante").checked = false;
+        document.getElementById("check-urgente").checked = false;
+
         renderizarTodo();
     }
 }
+
 function completarTareaWeb(indice) {
     ATEMPORAL.completarTarea(indice);
     renderizarTodo();
 }
+
 function eliminarTareaWeb(indice) {
     ATEMPORAL.eliminarTarea(indice);
     renderizarTodo();
 }
 
-function agregarObjetivoWeb() {
-    const input = document.getElementById("nuevo-objetivo");
-    if (input && input.value.trim() !== "") {
-        ATEMPORAL.agregarObjetivo(input.value);
-        input.value = "";
-        renderizarTodo();
-    }
-}
-function completarObjetivoWeb(indice) {
-    ATEMPORAL.completarObjetivo(indice);
-    renderizarTodo();
-}
-function eliminarObjetivoWeb(indice) {
-    ATEMPORAL.eliminarObjetivo(indice);
-    renderizarTodo();
-}
-
-function agregarHabitoWeb() {
-    const input = document.getElementById("nuevo-habito");
-    if (input && input.value.trim() !== "") {
-        ATEMPORAL.agregarHabito(input.value);
-        input.value = "";
-        renderizarTodo();
-    }
-}
-function registrarHabitoWeb(indice) {
-    ATEMPORAL.registrarHabito(indice);
-    renderizarTodo();
-}
-function eliminarHabitoWeb(indice) {
-    ATEMPORAL.eliminarHabito(indice);
-    renderizarTodo();
-}
-
-function agregarMovimientoWeb() {
-    const tipo = document.getElementById("tipo-movimiento").value;
-    const cantidad = parseFloat(document.getElementById("cantidad-movimiento").value);
-    const desc = document.getElementById("desc-movimiento").value;
-
-    if (!isNaN(cantidad) && cantidad > 0) {
-        ATEMPORAL.agregarMovimiento(tipo, cantidad, desc);
-        document.getElementById("cantidad-movimiento").value = "";
-        document.getElementById("desc-movimiento").value = "";
-        renderizarTodo();
-    }
-}
-
+// Clasifica y dibuja automáticamente cada tarea en su respectivo cuadrante
 function renderizarTodo() {
-    // Tareas
-    const listaT = document.getElementById("lista-tareas");
-    if (listaT) {
-        listaT.innerHTML = "";
-        ATEMPORAL.tareas.forEach((t, i) => {
-            const li = document.createElement("li");
-            if (t.completada) li.className = "completada";
-            li.innerHTML = `
-                <span>${t.nombre}</span>
-                <div class="actions-div">
-                    ${!t.completada ? `<button class="btn-check" onclick="completarTareaWeb(${i})">✓</button>` : '🎉'}
-                    <button class="btn-delete" onclick="eliminarTareaWeb(${i})">🗑️</button>
-                </div>`;
-            listaT.appendChild(li);
-        });
-    }
+    const c1 = document.getElementById("lista-c1");
+    const c2 = document.getElementById("lista-c2");
+    const c3 = document.getElementById("lista-c3");
+    const c4 = document.getElementById("lista-c4");
 
-    // Objetivos
-    const listaO = document.getElementById("lista-objetivos");
-    if (listaO) {
-        listaO.innerHTML = "";
-        ATEMPORAL.objetivos.forEach((o, i) => {
-            const li = document.createElement("li");
-            if (o.completado) li.className = "completada";
-            li.innerHTML = `
-                <span>${o.nombre}</span>
-                <div class="actions-div">
-                    ${!o.completado ? `<button class="btn-check" onclick="completarObjetivoWeb(${i})">✓</button>` : '🏆'}
-                    <button class="btn-delete" onclick="eliminarObjetivoWeb(${i})">🗑️</button>
-                </div>`;
-            listaO.appendChild(li);
-        });
-    }
+    // Limpiar listas visuales
+    if(c1) c1.innerHTML = "";
+    if(c2) c2.innerHTML = "";
+    if(c3) c3.innerHTML = "";
+    if(c4) c4.innerHTML = "";
 
-    // Hábitos
-    const listaH = document.getElementById("lista-habitos");
-    if (listaH) {
-        listaH.innerHTML = "";
-        ATEMPORAL.habitos.forEach((h, i) => {
-            const li = document.createElement("li");
-            li.innerHTML = `
-                <span>${h.nombre} <b>(${h.registros.length} d)</b></span>
-                <div class="actions-div">
-                    <button class="btn-check" onclick="registrarHabitoWeb(${i})">+1</button>
-                    <button class="btn-delete" onclick="eliminarHabitoWeb(${i})">🗑️</button>
-                </div>`;
-            listaH.appendChild(li);
-        });
-    }
+    let counts = { c1: 0, c2: 0, c3: 0, c4: 0 };
 
-    // Finanzas
-    const ingresos = ATEMPORAL.movimientos.filter(m => m.tipo === "ingreso").reduce((sum, m) => sum + m.cantidad, 0);
-    const gastos = ATEMPORAL.movimientos.filter(m => m.tipo === "gasto").reduce((sum, m) => sum + m.cantidad, 0);
-    const balance = ingresos - gastos;
+    ATEMPORAL.tareas.forEach((tarea, i) => {
+        const li = document.createElement("li");
+        if (tarea.completada) li.className = "completada";
 
-    if (document.getElementById("fin-ingresos")) {
-        document.getElementById("fin-ingresos").innerText = "S/ " + ingresos.toFixed(2);
-        document.getElementById("fin-gasto").innerText = "S/ " + gastos.toFixed(2);
-        document.getElementById("fin-balance").innerText = "S/ " + balance.toFixed(2);
-    }
+        li.innerHTML = `
+            <div class="tarea-info">
+                <span class="tarea-texto">${tarea.nombre}</span>
+                <span class="tarea-fecha">📅 Entrega: ${tarea.fecha}</span>
+            </div>
+            <div class="actions-div">
+                ${!tarea.completada ? `<button class="btn-check" onclick="completarTareaWeb(${i})">✓</button>` : '🎉'}
+                <button class="btn-delete" onclick="eliminarTareaWeb(${i})">🗑️</button>
+            </div>
+        `;
+
+        // Clasificación de forma automática usando condicionales cruzados
+        if (tarea.importante && tarea.urgente) {
+            c1.appendChild(li);
+            counts.c1++;
+        } else if (tarea.importante && !tarea.urgente) {
+            c2.appendChild(li);
+            counts.c2++;
+        } else if (!tarea.importante && tarea.urgente) {
+            c3.appendChild(li);
+            counts.c3++;
+        } else {
+            c4.appendChild(li);
+            counts.c4++;
+        }
+    });
+
+    // Actualizar marcadores de cantidad numéricos
+    if(document.getElementById("c1-count")) document.getElementById("c1-count").innerText = counts.c1;
+    if(document.getElementById("c2-count")) document.getElementById("c2-count").innerText = counts.c2;
+    if(document.getElementById("c3-count")) document.getElementById("c3-count").innerText = counts.c3;
+    if(document.getElementById("c4-count")) document.getElementById("c4-count").innerText = counts.c4;
 }
