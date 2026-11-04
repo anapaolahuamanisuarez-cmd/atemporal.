@@ -96,7 +96,6 @@ const ATEMPORAL = {
                 const limite = new Date(t.fechaLimite);
                 const diferenciaHoras = (limite - ahora) / (1000 * 60 * 60);
 
-                // Configurado a 20 horas de anticipación
                 if (diferenciaHoras > 0 && diferenciaHoras <= 20 && !t.notificada) {
                     t.notificada = true;
                     huboCambios = true;
@@ -170,7 +169,7 @@ function agregarObjetivoWeb() {
         renderizarTodo(); 
     }
 }
-function completarObjectiveWeb(i) { ATEMPORAL.completarObjetivo(i); renderizarTodo(); }
+function completarObjetivoWeb(i) { ATEMPORAL.completarObjetivo(i); renderizarTodo(); }
 
 function agregarHabitoWeb() {
     const input = document.getElementById("nuevo-habito");
@@ -245,7 +244,7 @@ function renderizarTodo() {
         ATEMPORAL.objetivos.forEach((o, i) => {
             const li = document.createElement("li");
             if (o.completado) li.className = "completada";
-            li.innerHTML = `<span>${o.nombre}</span> <div>${!o.completado ? `<button class="btn-check" onclick="ATEMPORAL.completarObjetivo(${i}); renderizarTodo();">✓</button>` : '🏆'}</div>`;
+            li.innerHTML = `<span>${o.nombre}</span> <div>${!o.completado ? `<button class="btn-check" onclick="completarObjetivoWeb(${i})">✓</button>` : '🏆'}</div>`;
             listaO.appendChild(li);
         });
     }
@@ -261,3 +260,4 @@ function renderizarTodo() {
     }
 
     const finIngresos = document.getElementById("fin-ingresos");
+    const finGasto = document.getElementById("fin-gasto");
