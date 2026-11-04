@@ -1,6 +1,7 @@
 "use strict";
 
 const ATEMPORAL = {
+    // Corregido: Ahora se inicializan correctamente los arreglos vacíos si no hay datos previos
     tareas: JSON.parse(localStorage.getItem("at_tareas")) || [],
     objetivos: JSON.parse(localStorage.getItem("at_objetivos")) || [],
     habitos: JSON.parse(localStorage.getItem("at_habitos")) || [],
@@ -19,9 +20,9 @@ const ATEMPORAL = {
         });
     },
 
-    agregarTarea(nombre, fecha = "Sin fecha") {
+    agregarTarea(nombre) {
         if (!nombre || !nombre.trim()) return;
-        this.tareas.push({ nombre: nombre.trim(), fecha, completada: false });
+        this.tareas.push({ nombre: nombre.trim(), completada: false });
         this.guardar();
     },
 
@@ -82,11 +83,6 @@ const ATEMPORAL = {
         if (!["ingreso", "gasto"].includes(tipo) || isNaN(cantidad) || cantidad <= 0) return;
         this.movimientos.push({ tipo, cantidad, descripcion: descripcion || "Sin descripción" });
         this.guardar();
-    },
-
-    eliminarMovimiento(indice) {
-        this.movimientos.splice(indice, 1);
-        this.guardar();
     }
 };
 
@@ -94,11 +90,14 @@ const ATEMPORAL = {
 //          CONTROLADORES DE LA INTERFAZ WEB
 // ============================================
 
-document.getElementById("fecha-actual").innerText = ATEMPORAL.fechaActual();
+window.onload = function() {
+    document.getElementById("fecha-actual").innerText = ATEMPORAL.fechaActual();
+    renderizarTodo();
+};
 
 function agregarTareaWeb() {
     const input = document.getElementById("nueva-tarea");
-    if (input.value.trim() !== "") {
+    if (input && input.value.trim() !== "") {
         ATEMPORAL.agregarTarea(input.value);
         input.value = "";
         renderizarTodo();
@@ -115,7 +114,7 @@ function eliminarTareaWeb(indice) {
 
 function agregarObjetivoWeb() {
     const input = document.getElementById("nuevo-objetivo");
-    if (input.value.trim() !== "") {
+    if (input && input.value.trim() !== "") {
         ATEMPORAL.agregarObjetivo(input.value);
         input.value = "";
         renderizarTodo();
@@ -132,7 +131,7 @@ function eliminarObjetivoWeb(indice) {
 
 function agregarHabitoWeb() {
     const input = document.getElementById("nuevo-habito");
-    if (input.value.trim() !== "") {
+    if (input && input.value.trim() !== "") {
         ATEMPORAL.agregarHabito(input.value);
         input.value = "";
         renderizarTodo();
@@ -163,57 +162,62 @@ function agregarMovimientoWeb() {
 function renderizarTodo() {
     // Tareas
     const listaT = document.getElementById("lista-tareas");
-    listaT.innerHTML = "";
-    ATEMPORAL.tareas.forEach((t, i) => {
-        const li = document.createElement("li");
-        if (t.completada) li.className = "completada";
-        li.innerHTML = `
-            <span>${t.nombre}</span>
-            <div class="actions-div">
-                ${!t.completada ? `<button class="btn-check" onclick="completarTareaWeb(${i})">✓</button>` : '🎉'}
-                <button class="btn-delete" onclick="eliminarTareaWeb(${i})">🗑️</button>
-            </div>`;
-        listaT.appendChild(li);
-    });
+    if (listaT) {
+        listaT.innerHTML = "";
+        ATEMPORAL.tareas.forEach((t, i) => {
+            const li = document.createElement("li");
+            if (t.completada) li.className = "completada";
+            li.innerHTML = `
+                <span>${t.nombre}</span>
+                <div class="actions-div">
+                    ${!t.completada ? `<button class="btn-check" onclick="completarTareaWeb(${i})">✓</button>` : '🎉'}
+                    <button class="btn-delete" onclick="eliminarTareaWeb(${i})">🗑️</button>
+                </div>`;
+            listaT.appendChild(li);
+        });
+    }
 
     // Objetivos
     const listaO = document.getElementById("lista-objetivos");
-    listaO.innerHTML = "";
-    ATEMPORAL.objetivos.forEach((o, i) => {
-        const li = document.createElement("li");
-        if (o.completado) li.className = "completada";
-        li.innerHTML = `
-            <span>${o.nombre}</span>
-            <div class="actions-div">
-                ${!o.completado ? `<button class="btn-check" onclick="completarObjetivoWeb(${i})">✓</button>` : '🏆'}
-                <button class="btn-delete" onclick="eliminarObjetivoWeb(${i})">🗑️</button>
-            </div>`;
-        listaO.appendChild(li);
-    });
+    if (listaO) {
+        listaO.innerHTML = "";
+        ATEMPORAL.objetivos.forEach((o, i) => {
+            const li = document.createElement("li");
+            if (o.completado) li.className = "completada";
+            li.innerHTML = `
+                <span>${o.nombre}</span>
+                <div class="actions-div">
+                    ${!o.completado ? `<button class="btn-check" onclick="completarObjetivoWeb(${i})">✓</button>` : '🏆'}
+                    <button class="btn-delete" onclick="eliminarObjetivoWeb(${i})">🗑️</button>
+                </div>`;
+            listaO.appendChild(li);
+        });
+    }
 
     // Hábitos
     const listaH = document.getElementById("lista-habitos");
-    listaH.innerHTML = "";
-    ATEMPORAL.habitos.forEach((h, i) => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-            <span>${h.nombre} <b>(${h.registros.length} d)</b></span>
-            <div class="actions-div">
-                <button class="btn-check" onclick="registrarHabitoWeb(${i})">+1 Día</button>
-                <button class="btn-delete" onclick="eliminarHabitoWeb(${i})">🗑️</button>
-            </div>`;
-        listaH.appendChild(li);
-    });
+    if (listaH) {
+        listaH.innerHTML = "";
+        ATEMPORAL.habitos.forEach((h, i) => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <span>${h.nombre} <b>(${h.registros.length} d)</b></span>
+                <div class="actions-div">
+                    <button class="btn-check" onclick="registrarHabitoWeb(${i})">+1</button>
+                    <button class="btn-delete" onclick="eliminarHabitoWeb(${i})">🗑️</button>
+                </div>`;
+            listaH.appendChild(li);
+        });
+    }
 
-    // Finanzas recalculadas
+    // Finanzas
     const ingresos = ATEMPORAL.movimientos.filter(m => m.tipo === "ingreso").reduce((sum, m) => sum + m.cantidad, 0);
     const gastos = ATEMPORAL.movimientos.filter(m => m.tipo === "gasto").reduce((sum, m) => sum + m.cantidad, 0);
     const balance = ingresos - gastos;
 
-    document.getElementById("fin-ingresos").innerText = "S/ " + ingresos.toFixed(2);
-    document.getElementById("fin-gasto").innerText = "S/ " + gastos.toFixed(2);
-    document.getElementById("fin-balance").innerText = "S/ " + balance.toFixed(2);
+    if (document.getElementById("fin-ingresos")) {
+        document.getElementById("fin-ingresos").innerText = "S/ " + ingresos.toFixed(2);
+        document.getElementById("fin-gasto").innerText = "S/ " + gastos.toFixed(2);
+        document.getElementById("fin-balance").innerText = "S/ " + balance.toFixed(2);
+    }
 }
-
-// Carga inicial
-renderizarTodo();
