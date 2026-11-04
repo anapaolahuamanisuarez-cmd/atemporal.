@@ -1,7 +1,7 @@
 "use strict";
 
 const ATEMPORAL = {
-    // Almacenamiento local persistente de todas las variables originales
+    // Corregido: Se agregaron los corchetes [] para evitar errores de carga inicial
     tareas: JSON.parse(localStorage.getItem("at_web_tareas")) || [],
     objetivos: JSON.parse(localStorage.getItem("at_web_objetivos")) || [],
     habitos: JSON.parse(localStorage.getItem("at_web_habitos")) || [],
@@ -40,7 +40,6 @@ const ATEMPORAL = {
         const tarea = this.tareas[indice];
         if (tarea && !tarea.completada) {
             tarea.completada = true;
-            // Si no se venció, sumas +1 punto
             if (!(tarea.fechaLimite && new Date() > new Date(tarea.fechaLimite))) {
                 this.puntos += 1;
             }
@@ -57,7 +56,7 @@ const ATEMPORAL = {
     completarObjetivo(indice) {
         if (this.objetivos[indice] && !this.objetivos[indice].completado) {
             this.objetivos[indice].completado = true;
-            this.puntos += 5; // Un objetivo mayor te otorga un súper bono de +5 puntos!
+            this.puntos += 5; 
             this.guardar();
         }
     },
@@ -74,7 +73,7 @@ const ATEMPORAL = {
         const hoy = new Date().toLocaleDateString("en-CA");
         if (!habito.registros.includes(hoy)) {
             habito.registros.push(hoy);
-            this.puntos += 1; // Registrar tu hábito diario te da +1 punto
+            this.puntos += 1; 
             this.guardar();
         } else {
             alert("¡Ya registraste este hábito hoy!");
@@ -82,7 +81,8 @@ const ATEMPORAL = {
     },
 
     agregarMovimiento(tipo, cantidad, descripcion) {
-        if (!["ingreso", "gasto"].includes(tipo) || isNaN(cantidad) || cantidad <= 0) return;
+        if (!["focus", "ingreso", "gasto"].includes(tipo) && !["ingreso", "gasto"].includes(tipo)) return;
+        if (isNaN(cantidad) || cantidad <= 0) return;
         this.movimientos.push({ tipo, cantidad, descripcion: descripcion || "Sin descripción" });
         this.guardar();
     },
@@ -94,7 +94,7 @@ const ATEMPORAL = {
             if (!t.completada && !t.penalizada && t.fechaLimite) {
                 if (ahora > new Date(t.fechaLimite)) {
                     t.penalizada = true;
-                    this.puntos -= 2; // Penalización automática de -2 puntos
+                    this.puntos -= 2; 
                     huboCambios = true;
                 }
             }
@@ -111,7 +111,9 @@ const ATEMPORAL = {
 // ============================================
 
 window.onload = function() {
-    document.getElementById("fecha-actual").innerText = ATEMPORAL.fechaActual();
+    if(document.getElementById("fecha-actual")) {
+        document.getElementById("fecha-actual").innerText = ATEMPORAL.fechaActual();
+    }
     renderizarTodo();
     setInterval(() => { ATEMPORAL.verificarVencimientos(); }, 4000);
 };
@@ -131,14 +133,24 @@ function agregarTareaWeb() {
 }
 
 function completarTareaWeb(i) { ATEMPORAL.completarTarea(i); renderizarTodo(); }
+
 function agregarObjetivoWeb() {
     const input = document.getElementById("nuevo-objetivo");
-    if (input && input.value.trim() !== "") { ATEMPORAL.agregarObjetivo(input.value); input.value = ""; renderizarTodo(); }
+    if (input && input.value.trim() !== "") { 
+        ATEMPORAL.agregarObjetivo(input.value); 
+        input.value = ""; 
+        renderizarTodo(); 
+    }
 }
 function completarObjetivoWeb(i) { ATEMPORAL.completarObjetivo(i); renderizarTodo(); }
+
 function agregarHabitoWeb() {
     const input = document.getElementById("nuevo-habito");
-    if (input && input.value.trim() !== "") { ATEMPORAL.agregarHabito(input.value); input.value = ""; renderizarTodo(); }
+    if (input && input.value.trim() !== "") { 
+        ATEMPORAL.agregarHabito(input.value); 
+        input.value = ""; 
+        renderizarTodo(); 
+    }
 }
 function registrarHabitoWeb(i) { ATEMPORAL.registrarHabito(i); renderizarTodo(); }
 
@@ -155,17 +167,18 @@ function agregarMovimientoWeb() {
 }
 
 function renderizarTodo() {
-    // Render de Puntos y Rangos Dinámicos
-    if(document.getElementById("puntos-total")) document.getElementById("puntos-total").innerText = ATEMPORAL.puntos;
+    if(document.getElementById("puntos-total")) {
+        document.getElementById("puntos-total").innerText = ATEMPORAL.puntos;
+    }
+    
     if(document.getElementById("rango-jugador")) {
-        let rango = "Novato";
+        let rango = "Novato 🛡️";
         if (ATEMPORAL.puntos >= 30) rango = "Productivo Leyenda 🏆";
         else if (ATEMPORAL.puntos >= 15) rango = "Enfoque Avanzado ⭐";
         else if (ATEMPORAL.puntos >= 5) rango = "Iniciado Activo ⚡";
         document.getElementById("rango-jugador").innerText = rango;
     }
 
-    // Render de Tareas con Clasificación de Etiquetas Visuales
     const listaT = document.getElementById("lista-tareas");
     if (listaT) {
         listaT.innerHTML = "";
@@ -175,7 +188,6 @@ function renderizarTodo() {
             if (t.completada) li.className = "completada";
             else if (t.fechaLimite && ahora > new Date(t.fechaLimite)) li.className = "vencida";
 
-            // Determinar etiqueta cruzada de importancia
             let tag = `[${t.importante ? 'Importante' : 'No Importante'} | ${t.urgente ? 'Urgente' : 'No Urgente'}]`;
 
             li.innerHTML = `
@@ -189,7 +201,6 @@ function renderizarTodo() {
         });
     }
 
-    // Render de Objetivos
     const listaO = document.getElementById("lista-objetivos");
     if (listaO) {
         listaO.innerHTML = "";
@@ -201,7 +212,6 @@ function renderizarTodo() {
         });
     }
 
-    // Render de Hábitos
     const listaH = document.getElementById("lista-habitos");
     if (listaH) {
         listaH.innerHTML = "";
@@ -212,10 +222,16 @@ function renderizarTodo() {
         });
     }
 
-    // Render de Finanzas Calculadas
-    const ingresos = ATEMPORAL.movimientos.filter(m => m.tipo === "ingreso").reduce((sum, m) => sum + m.cantidad, 0);
-    const gastos = ATEMPORAL.movimientos.filter(m => m.tipo === "gasto").reduce((sum, m) => sum + m.cantidad, 0);
-    document.getElementById("fin-ingresos").innerText = "S/ " + ingresos.toFixed(2);
-    document.getElementById("fin-gasto").innerText = "S/ " + gastos.toFixed(2);
-    document.getElementById("fin-balance").innerText = "S/ " + (ingresos - gastos).toFixed(2);
+    const finIngresos = document.getElementById("fin-ingresos");
+    const finGasto = document.getElementById("fin-gasto");
+    const finBalance = document.getElementById("fin-balance");
+
+    if (finIngresos && finGasto && finBalance) {
+        const ingresos = ATEMPORAL.movimientos.filter(m => m.tipo === "ingreso").reduce((sum, m) => sum + m.cantidad, 0);
+        const gastos = ATEMPORAL.movimientos.filter(m => m.tipo === "gasto").reduce((sum, m) => sum + m.cantidad, 0);
+        finIngresos.innerText = "S/ " + ingresos.toFixed(2);
+        finGasto.innerText = "S/ " + gastos.toFixed(2);
+        finBalance.innerText = "S/ " + (ingresos - gastos).toFixed(2);
+    }
 }
+
