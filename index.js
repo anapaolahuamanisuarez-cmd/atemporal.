@@ -1,7 +1,6 @@
 "use strict";
 
 const ATEMPORAL = {
-    // Corregido: Se agregaron los corchetes [] para evitar errores de carga inicial
     tareas: JSON.parse(localStorage.getItem("at_web_tareas")) || [],
     objetivos: JSON.parse(localStorage.getItem("at_web_objetivos")) || [],
     habitos: JSON.parse(localStorage.getItem("at_web_habitos")) || [],
@@ -81,7 +80,7 @@ const ATEMPORAL = {
     },
 
     agregarMovimiento(tipo, cantidad, descripcion) {
-        if (!["focus", "ingreso", "gasto"].includes(tipo) && !["ingreso", "gasto"].includes(tipo)) return;
+        if (!["ingreso", "gasto"].includes(tipo)) return;
         if (isNaN(cantidad) || cantidad <= 0) return;
         this.movimientos.push({ tipo, cantidad, descripcion: descripcion || "Sin descripción" });
         this.guardar();
@@ -134,6 +133,7 @@ function agregarTareaWeb() {
 
 function completarTareaWeb(i) { ATEMPORAL.completarTarea(i); renderizarTodo(); }
 
+// Corregido de forma redundante
 function agregarObjetivoWeb() {
     const input = document.getElementById("nuevo-objetivo");
     if (input && input.value.trim() !== "") { 
@@ -234,4 +234,3 @@ function renderizarTodo() {
         finBalance.innerText = "S/ " + (ingresos - gastos).toFixed(2);
     }
 }
-
