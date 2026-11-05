@@ -4,6 +4,7 @@ const ATEMPORAL = {
     tareas: JSON.parse(localStorage.getItem("at_web_tareas")) || [],
     objetivos: JSON.parse(localStorage.getItem("at_web_objetivos")) || [],
     habitos: JSON.parse(localStorage.getItem("at_web_habitos")) || [],
+    notas: JSON.parse(localStorage.getItem("at_web_notas")) || [],
     movimientos: JSON.parse(localStorage.getItem("at_web_movimientos")) || [],
     puntos: parseInt(localStorage.getItem("at_web_puntos")) || 0,
 
@@ -11,6 +12,7 @@ const ATEMPORAL = {
         localStorage.setItem("at_web_tareas", JSON.stringify(this.tareas));
         localStorage.setItem("at_web_objetivos", JSON.stringify(this.objetivos));
         localStorage.setItem("at_web_habitos", JSON.stringify(this.habitos));
+        localStorage.setItem("at_web_notas", JSON.stringify(this.notas));
         localStorage.setItem("at_web_movimientos", JSON.stringify(this.movimientos));
         localStorage.setItem("at_web_puntos", this.puntos.toString());
     },
@@ -80,6 +82,16 @@ const ATEMPORAL = {
         }
     },
 
+    agregarNota(titulo, contenido) {
+        if (!titulo || !titulo.trim() || !contenido || !contenido.trim()) return;
+        this.notas.push({
+            titulo: titulo.trim(),
+            contenido: contenido.trim(),
+            fecha: this.fechaActual()
+        });
+        this.guardar();
+    },
+
     agregarMovimiento(tipo, cantidad, descripcion) {
         if (!["ingreso", "gasto"].includes(tipo)) return;
         if (isNaN(cantidad) || cantidad <= 0) return;
@@ -121,14 +133,9 @@ const ATEMPORAL = {
 function crearAlertaVisual(mensaje) {
     const contenedor = document.getElementById("contenedor-notificaciones");
     if (!contenedor) return;
-
     const div = document.createElement("div");
     div.className = "notificacion-alerta";
-    div.innerHTML = `
-        <span>${mensaje}</span>
-        <button class="btn-cerrar-notif" onclick="this.parentElement.remove()">✕</button>
-    `;
-
+    div.innerHTML = `<span>${mensaje}</span><button class="btn-cerrar-notif" onclick="this.parentElement.remove()">✕</button>`;
     contenedor.appendChild(div);
     setTimeout(() => { div.remove(); }, 8000);
 }
@@ -150,11 +157,9 @@ function agregarTareaWeb() {
     const fec = document.getElementById("fecha-tarea");
     const imp = document.getElementById("select-importante").value === "si";
     const urg = document.getElementById("select-urgente").value === "si";
-
     if (nom && nom.value.trim() !== "") {
         ATEMPORAL.agregarTarea(nom.value, fec.value, imp, urg);
-        nom.value = "";
-        fec.value = "";
+        nom.value = ""; fec.value = "";
         renderizarTodo();
     }
 }
@@ -165,8 +170,7 @@ function agregarObjetivoWeb() {
     const input = document.getElementById("nuevo-objetivo");
     if (input && input.value.trim() !== "") { 
         ATEMPORAL.agregarObjetivo(input.value); 
-        input.value = ""; 
-        renderizarTodo(); 
+        input.value = ""; renderizarTodo(); 
     }
 }
 function completarObjetivoWeb(i) { ATEMPORAL.completarObjetivo(i); renderizarTodo(); }
@@ -175,11 +179,20 @@ function agregarHabitoWeb() {
     const input = document.getElementById("nuevo-habito");
     if (input && input.value.trim() !== "") { 
         ATEMPORAL.agregarHabito(input.value); 
-        input.value = ""; 
-        renderizarTodo(); 
+        input.value = ""; renderizarTodo(); 
     }
 }
 function registrarHabitoWeb(i) { ATEMPORAL.registrarHabito(i); renderizarTodo(); }
+
+function agregarNotaWeb() {
+    const tit = document.getElementById("titulo-nota");
+    const con = document.getElementById("contenido-nota");
+    if (tit && con && tit.value.trim() !== "" && con.value.trim() !== "") {
+        ATEMPORAL.agregarNota(tit.value, con.value);
+        tit.value = ""; con.value = "";
+        renderizarTodo();
+    }
+}
 
 function agregarMovimientoWeb() {
     const tipo = document.getElementById("tipo-movimiento").value;
@@ -194,13 +207,9 @@ function agregarMovimientoWeb() {
 }
 
 function renderizarTodo() {
-    if(document.getElementById("puntos-total")) {
-        document.getElementById("puntos-total").innerText = ATEMPORAL.puntos;
-    }
+    if(document.getElementById("puntos-total")) document.getElementById("puntos-total").innerText = ATEMPORAL.puntos;
     
-    let rango = "Novato 🛡️";
-    let porcentaje = 0;
-    
+    let rango = "Novato 🛡️"; let porcentaje = 0;
     if (ATEMPORAL.puntos >= 30) { rango = "Productivo Leyenda 🏆"; porcentaje = 100; }
     else if (ATEMPORAL.puntos >= 15) { rango = "Enfoque Avanzado ⭐"; porcentaje = ((ATEMPORAL.puntos - 15) / 15) * 100; }
     else if (ATEMPORAL.puntos >= 5) { rango = "Iniciado Activo ⚡"; porcentaje = ((ATEMPORAL.puntos - 5) / 10) * 100; }
@@ -211,29 +220,16 @@ function renderizarTodo() {
 
     const listaT = document.getElementById("lista-tareas");
     if (listaT) {
-        listaT.innerHTML = "";
-        const ahora = new Date();
+        listaT.innerHTML = ""; const ahora = new Date();
         ATEMPORAL.tareas.forEach((t, i) => {
             const li = document.createElement("li");
-            
-            if (t.completada) {
-                li.className = "completada";
-            } else if (t.fechaLimite) {
-                const limite = new Date(t.fechaLimite);
-                const difHoras = (limite - ahora) / (1000 * 60 * 60);
-                if (difHoras <= 0) li.className = "vencida";
-                else if (difHoras <= 20) li.className = "proxima-vencer"; 
+            if (t.completada) li.className = "completada";
+            else if (t.fechaLimite) {
+                const limite = new Date(t.fechaLimite); const difHoras = (limite - ahora) / (1000 * 60 * 60);
+                if (difHoras <= 0) li.className = "vencida"; else if (difHoras <= 20) li.className = "proxima-vencer"; 
             }
-
             let tag = `[${t.importante ? 'Importante' : 'No Importante'} | ${t.urgente ? 'Urgente' : 'No Urgente'}]`;
-
-            li.innerHTML = `
-                <div>
-                    <span><b>${tag}</b> ${t.nombre}</span><br>
-                    <small style="color:var(--text-muted)">📅 Límite: ${t.fechaTexto} ${t.penalizada ? '⚠️ (Vencida -2 Puntos)' : ''}</small>
-                </div>
-                <div>${!t.completada ? `<button class="btn-check" onclick="completarTareaWeb(${i})">✓</button>` : '🎉'}</div>
-            `;
+            li.innerHTML = `<div><span><b>${tag}</b> ${t.nombre}</span><br><small style="color:var(--text-muted)">📅 Límite: ${t.fechaTexto} ${t.penalizada ? '⚠️ (Vencida -2 Puntos)' : ''}</small></div><div>${!t.completada ? `<button class="btn-check" onclick="completarTareaWeb(${i})">✓</button>` : '🎉'}</div>`;
             listaT.appendChild(li);
         });
     }
@@ -242,22 +238,9 @@ function renderizarTodo() {
     if (listaO) {
         listaO.innerHTML = "";
         ATEMPORAL.objetivos.forEach((o, i) => {
-            const li = document.createElement("li");
-            if (o.completado) li.className = "completada";
+            const li = document.createElement("li"); if (o.completado) li.className = "completada";
             li.innerHTML = `<span>${o.nombre}</span> <div>${!o.completado ? `<button class="btn-check" onclick="completarObjetivoWeb(${i})">✓</button>` : '🏆'}</div>`;
             listaO.appendChild(li);
         });
     }
 
-    const listaH = document.getElementById("lista-habitos");
-    if (listaH) {
-        listaH.innerHTML = "";
-        ATEMPORAL.habitos.forEach((h, i) => {
-            const li = document.createElement("li");
-            li.innerHTML = `<span>${h.nombre} <b>(${h.registros.length} d)</b></span> <button class="btn-check" onclick="registrarHabitoWeb(${i})">+1 d</button>`;
-            listaH.appendChild(li);
-        });
-    }
-
-    const finIngresos = document.getElementById("fin-ingresos");
-    const finGasto = document.getElementById("fin-gasto");
